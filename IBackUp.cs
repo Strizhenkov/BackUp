@@ -1,5 +1,8 @@
 namespace Backups;
 
+/// <summary>
+/// Тут всё переделать
+/// </summary>
 public interface IBackupObject
 {
     /// <summary>

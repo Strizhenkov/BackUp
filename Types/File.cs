@@ -1,4 +1,5 @@
 using System.Runtime.Intrinsics.Arm;
+using System.Text;
 
 namespace Backups.Types;
 
@@ -10,12 +11,10 @@ public enum StoreAlg
     GZip
 };
 
-public class File : IBackupObject
+public class File
 {
-    // private string rootFolder;  //  корень папки, которую сохраняем
     private string pathToFile;  // имя исходного файла
-    private string pathToBackup;  //  путь к сохраненному файлу
-    private Storage container;
+    private IStorage container;
     private DateTime modifyDateTime;
 
     /// <summary>
@@ -23,18 +22,71 @@ public class File : IBackupObject
     /// </summary>
     /// <param name="path">Полный путь к файлу</param>
     /// <param name="storedPath">Папка с бэкапами этих файлов</param>
-    public File(string path, string storedPath)
+    public File(string path, IRepository repository)
     {
+        //  Запоминаем путь
         pathToFile = path;
-        pathToBackup = storedPath + path.Substring(path.LastIndexOf('/'), path.Length - path.LastIndexOf('/'));
+        //  Создаём объект для хранения 
+        string BackupName = path;
+        if(BackupName.IndexOf('/') >= 0)
+            BackupName = BackupName.Substring(path.LastIndexOf('/'), path.Length - path.LastIndexOf('/'));
+        container = repository.createStorageObj(BackupName);
         modifyDateTime = System.IO.File.GetLastWriteTime(pathToFile);
     }
 
-    public void CreateBackupObject(string path)
+    public static string CalculateMD5(string filename)
     {
-        //  Разделить path на имя файла и имя папки
-        //  Создать полное имя для сохранения в storedPath
-        //  Как с помощью zip-арзиватора создать архив в папке
+        using (var md5 = System.Security.Cryptography.MD5.Create())
+        {
+            using (var stream = System.IO.File.OpenRead(filename))
+            {
+              
+
+                    byte[] buffer = md5.ComputeHash(stream);
+                    StringBuilder result = new StringBuilder(buffer.Length*2);
+
+                    for(int i = 0; i < buffer.Length; i++)
+                        result.Append(buffer[i].ToString("x2"));
+
+                    return result.ToString();
+            }
+        }
+    }
+
+    public string GeteMD5()
+    {
+        using (var md5 = System.Security.Cryptography.MD5.Create())
+        {
+            container.stream.Seek(0, SeekOrigin.Begin);
+            byte[] buffer = md5.ComputeHash(container.stream);
+            StringBuilder result = new StringBuilder(buffer.Length*2);
+
+            for(int i = 0; i < buffer.Length; i++)
+                result.Append(buffer[i].ToString("x2"));
+
+            return result.ToString();
+        }
+    } 
+    
+    public void MakeBackup()
+    {
+        //  Создаём бэкап. Проверку не делаем - в любом случае при отсутствии файла будет исключение
+        FileStream fs = new FileStream(pathToFile, FileMode.Open);
+        //  Копируем в поток
+        container.stream.Seek(0, SeekOrigin.Begin);
+        fs.CopyTo(container.stream);
+        fs.Flush();
+        fs.Close();
+    }
+
+    public void RestoreFromBackup(string newFilename = "")
+    {
+        //  Создаём бэкап. Проверку не делаем - в любом случае при отсутствии файла будет исключение
+        FileStream fs = new FileStream(newFilename.Length == 0 ? pathToFile : newFilename, FileMode.Create);
+        //  Копируем в поток
+        container.stream.Seek(0, SeekOrigin.Begin);
+        container.stream.CopyTo(fs);
+        fs.Close();
     }
 
     /// <summary>
@@ -47,8 +99,4 @@ public class File : IBackupObject
         return System.IO.File.GetLastWriteTime(pathToFile) == modifyDateTime;
     }
 
-    void DeleteBackupObject(string path)
-    {
-        System.IO.File.Delete(path);
-    }
 }
