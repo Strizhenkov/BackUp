@@ -1,6 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using Backups.Types;
-using File = Backups.Types.File;
+using BackupSystem.Types;
+using File = BackupSystem.Types.File;
 
 
 string filename = "simple.txt";
@@ -15,16 +15,31 @@ System.IO.File.WriteAllText(filename3, s3);
 
 Console.WriteLine(File.CalculateMD5(filename3));
 
+using(SolidZipRepository repository = new SolidZipRepository("repo1.zip")) {
+    RestorePoint pt1 = new RestorePoint(repository);
+    pt1.AddFile(filename);
+    pt1.AddFile(filename2);
+    pt1.AddFile(filename3);
+    pt1.MakeBackup();
+}
+//  Проверить!
+{
+  //  Как восстановить? Есть только сохранённый репозиторий 
+  //RestorePoint pt1 = new RestorePoint("store/repo1.zip");
+  //pt1.RestoreBackup();
+}
+
+
     using(SolidZipRepository repository = new SolidZipRepository("zipped.zip")) {
 
     //  Тут создадим новый файл для проверки
     
-        Backups.Types.File file = new Backups.Types.File(filename, repository);
-        Backups.Types.File file2 = new Backups.Types.File(filename2, repository);
-        Backups.Types.File file3 = new Backups.Types.File(filename3, repository);
-        file.MakeBackup();
-        file2.MakeBackup();
-        file3.MakeBackup();
+        BackupSystem.Types.File file = new BackupSystem.Types.File(filename, repository);
+        BackupSystem.Types.File file2 = new BackupSystem.Types.File(filename2, repository);
+        BackupSystem.Types.File file3 = new BackupSystem.Types.File(filename3, repository);
+        file.CreateBackupObject();
+        file2.CreateBackupObject();
+        file3.CreateBackupObject();
         file.RestoreFromBackup();
         file2.RestoreFromBackup();
         file.RestoreFromBackup("simple4.txt");
@@ -32,3 +47,12 @@ Console.WriteLine(File.CalculateMD5(filename3));
         Console.WriteLine(File.CalculateMD5(filename3) == file2.GeteMD5());
     }
     
+    
+    /*  1. Попробовать сделать репозитории с просто хранением файлов внутри какой-то папки
+     *  2. Раздельные архивы zip
+     *  3. Попробовать запихивать в репозиторий файлы с полными именами  Bin\Files\simple.txt
+     *  4. Сделать базовый класс репозитория, который управляется с именами хранимых объектов
+     *  5. Продумтаь структуру остальную
+     *  6. Что с папками (Folder)
+     *
+     */

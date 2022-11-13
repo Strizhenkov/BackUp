@@ -2,7 +2,7 @@
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Backups.Types;
+namespace BackupSystem.Types;
 
 //  Репозиторий - ответственен за хранение набора Storage и/или Backup Object, с описанием всех
 //  параметров хранения - где и как хранятся данные, с использованием каких алгоритмов и прочее
@@ -121,7 +121,7 @@ public class SolidZipRepository : IRepository, IDisposable
             baseArchiveMemStream.Seek(0, SeekOrigin.Begin);
             baseArchiveMemStream.CopyTo(fileStream);
         }
-        Console.WriteLine("Dispose");
+        //Console.WriteLine("Dispose");
     }
 
     public IStorage findStorageObj(string objId)

@@ -1,17 +1,11 @@
-using System.Runtime.Intrinsics.Arm;
 using System.Text;
 
-namespace Backups.Types;
+namespace BackupSystem.Types;
 
 
-public enum StoreAlg 
-{
-    RawBytes,
-    Zip,
-    GZip
-};
 
-public class File
+
+public class File : IBackupObject
 {
     private string pathToFile;  // имя исходного файла
     private IStorage container;
@@ -68,7 +62,7 @@ public class File
         }
     } 
     
-    public void MakeBackup()
+    public void CreateBackupObject()
     {
         //  Создаём бэкап. Проверку не делаем - в любом случае при отсутствии файла будет исключение
         FileStream fs = new FileStream(pathToFile, FileMode.Open);
@@ -98,5 +92,9 @@ public class File
     {
         return System.IO.File.GetLastWriteTime(pathToFile) == modifyDateTime;
     }
-
+    
+    public void DeleteBackupObject(string path)
+    {
+        System.IO.File.Delete(path);
+    }
 }

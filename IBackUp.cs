@@ -1,4 +1,4 @@
-namespace Backups;
+namespace BackupSystem.Types;
 
 /// <summary>
 /// Тут всё переделать
@@ -9,14 +9,14 @@ public interface IBackupObject
     /// Создать объект в хранилище
     /// </summary>
     /// <param name="path">Путь к исходному объекту</param>
-    void CreateBackupObject(string path);
+    void CreateBackupObject();
 
     /// <summary>
     /// Проверка того, что объект был изменен
     /// </summary>
     /// <param name="path">Путь к исходному объекту</param>
     /// <returns>true если объект был изменен</returns>
-    bool IsBackupObjectChanged(string path);
+    //bool IsBackupObjectChanged();
 
-    void DeleteBackupObject(string path);
+    //void DeleteBackupObject();
 }

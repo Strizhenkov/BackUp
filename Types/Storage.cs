@@ -1,16 +1,14 @@
-using Backups.Types;
+using BackupSystem.Types;
 using System.IO.Compression;
 using System.Runtime.CompilerServices;
 
-namespace Backups;
+namespace BackupSystem.Types;
 
 //  Интерфейс доступа к хранилищу (файлу)
 public interface IStorage
 {
     //  Добавить информацию о времени создания, может быть хеш, может ещё что
-    
-    
-    
+
     //  Поток для чтения/записи
     Stream stream
     {

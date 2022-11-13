@@ -1,4 +1,4 @@
-namespace Backups.Types;
+namespace BackupSystem.Types;
 
 public class Folder : IBackupObject
 {
@@ -19,7 +19,7 @@ public class Folder : IBackupObject
     {
         pathToFolder = path;
         pathToBackup = storedPath + path.Substring(path.LastIndexOf('/'), path.Length - path.LastIndexOf('/'));
-        modifyDateTime = System.IO.File.GetLastWriteTime(pathToFolder);
+        modifyDateTime = Directory.GetLastWriteTime(pathToFolder);
         _files = new List<File>();
         _folders = new List<Folder>();
     }
@@ -34,13 +34,27 @@ public class Folder : IBackupObject
         _folders.Add(folder);
     }
 
-    public void CreateBackupObject(string path)
+    public void CreateBackupObject()
     {
-        //  Разделить path на имя файла и имя папки
-        //  Создать полное имя для сохранения в storedPath
-        //  Как с помощью zip-арзиватора создать архив в папке
+        //  Создаём бэкап. Проверку не делаем - в любом случае при отсутствии файла будет исключение
+        FileStream fs = new FileStream(pathToFolder, FileMode.Open);
+        //  Копируем в поток
+        container.stream.Seek(0, SeekOrigin.Begin);
+        fs.CopyTo(container.stream);
+        fs.Flush();
+        fs.Close();
     }
 
+    public void RestoreFromBackup(string newFolderName = "")
+    {
+        //  Создаём бэкап. Проверку не делаем - в любом случае при отсутствии файла будет исключение
+        FileStream fs = new FileStream(newFolderName.Length == 0 ? pathToFolder : newFolderName, FileMode.Create);
+        //  Копируем в поток
+        container.stream.Seek(0, SeekOrigin.Begin);
+        container.stream.CopyTo(fs);
+        fs.Close();
+    }
+    
     /// <summary>
     /// Проверка того, что объект был изменен
     /// </summary>
